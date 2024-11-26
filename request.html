@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>საიტზე წვდომის მოთხოვნა</title>
+    <meta charset="UTF-8">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, push, onValue, update } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAFv9qvvt6QrV-WwUaBD8SS1eOZAhw-hE",
+            authDomain: "site-access-contro.firebaseapp.com",
+            databaseURL: "https://site-access-contro-default-rtdb.firebaseio.com",
+            projectId: "site-access-contro",
+            storageBucket: "site-access-contro.appspot.com",
+            messagingSenderId: "657592968002",
+            appId: "1:657592968002:web:763eb114220653f7addedb",
+            measurementId: "G-87RM2Z6F0S"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // გლობალური ცვლადი მოთხოვნის ID-სთვის
+        let currentRequestId = null;
+
+        let isRedirecting = false;
+
+        function safeRedirect(url) {
+            if (!isRedirecting) {
+                isRedirecting = true;
+                window.location.replace(url);
+            }
+        }
+
+        window.sendRequest = async function() {
+            const requestButton = document.getElementById('requestButton');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            try {
+                if (!navigator.onLine) {
+                    throw new Error('ინტერნეტთან კავშირი არ არის');
+                }
+
+                requestButton.disabled = true;
+                statusMessage.textContent = 'მოთხოვნის გაგზავნა...';
+
+                const uniqueCode = Math.floor(10000 + Math.random() * 90000).toString();
+                
+                const requestRef = ref(database, 'accessRequests');
+                const newRequest = await push(requestRef, {
+                    timestamp: Date.now(),
+                    status: 'pending',
+                    uniqueCode: uniqueCode,
+                    sessionId: Math.random().toString(36).substring(2, 15)
+                });
+
+                currentRequestId = newRequest.key;
+                statusMessage.innerHTML = `
+                    მოთხოვნა გაგზავნილია! გთხოვთ დაელოდოთ დასტურს.<br>
+                    <strong>თქვენი კოდი: ${uniqueCode}</strong>
+                `;
+                
+                localStorage.setItem('lastRequestCode', uniqueCode);
+                lastRequestCode.querySelector('strong').textContent = uniqueCode;
+                lastRequestCode.style.display = 'block';
+                
+                checkRequestStatus(currentRequestId);
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.textContent = `შეცდომა: ${error.message || 'გთხოვთ სცადოთ ხელახლა'}`;
+                requestButton.disabled = false;
+            }
+        }
+
+        function approveAccess() {
+            const uniqueCode = localStorage.getItem('lastRequestCode');
+            localStorage.setItem('uniqueCode', uniqueCode);
+            localStorage.setItem('accessApproved', 'true');
+            localStorage.setItem('offlineAccess', 'true');
+            localStorage.setItem('remainingTime', '31536000');
+            localStorage.setItem('lastUpdateTime', Date.now().toString());
+            localStorage.setItem('siteStatus', 'counting');
+            window.location.href = 'index.html';
+        }
+
+        function checkRequestStatus(requestId) {
+            const requestRef = ref(database, `accessRequests/${requestId}`);
+            onValue(requestRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data && data.status === 'approved') {
+                    approveAccess(); // გამოვიძახოთ approveAccess ფუნქცია დამტკიცების შემთხვევაში
+                }
+            });
+        }
+
+        // დავამატოთ ეს ფუნქციები window ობიექტზე
+        window.openInstructions = function() {
+            document.getElementById('instructionModal').style.display = 'block';
+        }
+
+        window.closeInstructions = function() {
+            document.getElementById('instructionModal').style.display = 'none';
+        }
+
+        // დავხუროთ მოდალური როცა გარეთ დააჭერს
+        window.onclick = function(event) {
+            const modal = document.getElementById('instructionModal');
+            if (event.target === modal) {
+                closeInstructions();
+            }
+        }
+
+        // დავამატოთ კოდი გვერდის ჩატვირთვისას ბოლო კოდის შესამომებლად
+        document.addEventListener('DOMContentLoaded', function() {
+            const lastCode = localStorage.getItem('lastRequestCode');
+            if (lastCode) {
+                const lastRequestCode = document.getElementById('lastRequestCode');
+                lastRequestCode.querySelector('strong').textContent = lastCode;
+                lastRequestCode.style.display = 'block';
+            }
+        });
+
+        // ერთი მთავარი ფუნქცია შემოწმებისთვის
+        function checkAccessStatus() {
+            const accessApproved = localStorage.getItem('accessApproved');
+            const siteStatus = localStorage.getItem('siteStatus');
+            const uniqueCode = localStorage.getItem('uniqueCode');
+            
+            // თუ წვდომა აქვს და საიტი არ არის shutdown
+            if (accessApproved && siteStatus !== 'shutdown' && uniqueCode) {
+                if (window.location.pathname.includes('request.html')) {
+                    window.location.replace('index.html');
+                }
+            } else {
+                if (!window.location.pathname.includes('request.html')) {
+                    window.location.replace('request.html');
+                }
+            }
+        }
+
+        // ერთხელ შემოწმება ჩატვირთვისას
+        document.addEventListener('DOMContentLoaded', checkAccessStatus);
+
+        // პერიოდული შემოწმება უფრო დიდი ინტერვალით
+        setInterval(checkAccessStatus, 30000);
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker დარეგისტრირდა:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker რეგისტრაცია ვერ მოხერხდა:', error);
+                    });
+            });
+        }
+    </script>
+
+    <style>
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(
+                -45deg,
+                #ee7752,
+                #e73c7e,
+                #23a6d5,
+                #23d5ab
+            );
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        .request-container {
+            text-align: center;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            color: white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .request-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .request-button:hover {
+            background-color: rgba(69, 160, 73, 0.9);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .request-button:disabled {
+            background-color: rgba(204, 204, 204, 0.8);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            font-size: 16px;
+            min-height: 20px;
+        }
+
+        .status-message strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 24px;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .facebook-logo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(24, 119, 242, 0.9);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .facebook-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            background-color: rgba(24, 119, 242, 1);
+        }
+
+        .facebook-logo::before {
+            content: "f";
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 40px;
+        }
+
+        .instruction-button {
+            position: fixed;
+            top: 20px;
+            left: 80px;
+            padding: 8px 20px;
+            font-size: 16px;
+            background-color: rgba(33, 150, 243, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .instruction-button:hover {
+            background-color: rgba(33, 150, 243, 0.9);
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.95);
+            margin: 15% auto;
+            padding: 30px;
+            width: 70%;
+            max-width: 600px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-button {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #000;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-content ol {
+            color: #444;
+            line-height: 1.6;
+            margin-left: 20px;
+        }
+
+        .modal-content li {
+            margin-bottom: 15px;
+        }
+
+        .modal-content strong {
+            color: #1877f2;
+            font-size: 1.1em;
+        }
+
+        .modal-content a {
+            color: #1877f2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .modal-content a:hover {
+            color: #115293;
+            text-decoration: underline;
+        }
+
+        .last-request-code {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 14px;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px; /* Padding for smaller screens */
+            }
+
+            .request-container {
+                padding: 20px; /* Reduced padding for mobile */
+                width: 100%; /* Full width on mobile */
+                box-shadow: none; /* Remove shadow for mobile */
+            }
+
+            .request-button {
+                width: 100%; /* Full width button on mobile */
+                font-size: 16px; /* Smaller font size for mobile */
+            }
+
+            .status-message {
+                font-size: 14px; /* Smaller font size for mobile */
+            }
+
+            .last-request-code {
+                font-size: 12px; /* Smaller font size for mobile */
+            }
+
+            .request-button {
+                padding: 20px 40px; /* Increased padding for better touch targets */
+                font-size: 20px; /* Increased font size for better readability */
+            }
+
+            .instruction-button {
+                padding: 12px 30px; /* Increased padding for better touch targets */
+                font-size: 18px; /* Increased font size for better readability */
+            }
+        }
+    </style>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<body>
+    <a href="https://www.facebook.com/groups/2996566913830378" target="_blank" class="facebook-logo"></a>
+    <button id="instructionButton" class="instruction-button" onclick="openInstructions()">
+        ინსტრუქცია
+    </button>
+    
+    <div class="request-container">
+        <button id="requestButton" class="request-button" onclick="sendRequest()">
+            მოთხოვნის გაგზავნა
+        </button>
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <!-- მოდალური ფანჯარა რჩება იგივე -->
+    <div id="instructionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeInstructions()">&times;</span>
+            <h2>როგრ მივიღოთ წვდომა საიტზე</h2>
+            <ol>
+                <li>გადარიცხეთ თანხა შემდეგ პირად ნომერზე: <strong>20001019597</strong></li>
+                <li>დააჭირეთ ღილაკს "ოხოვნის გაგზავნა"</li>
+                <li>დაიმახსოვრეთ თქვენთვის მინიჭებული უნიკალური კოდი</li>
+                <li>გადაგზავნეთ უნიალური კოდი ჩვენს <a href="https://www.facebook.com/groups/2996566913830378" target="_blank">Facebook გვერდზე</a></li>
+                <li>დაელოდეთ დადასტურებას, რის შემდეგაც ავტომატურად გადახვალთ საიტზე</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="lastRequestCode" class="last-request-code" style="display: none;">
+        ბოლო კოდი: <strong></strong>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2805 @@
+<html lang="ka"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>სლასის მენეჯერი</title>
+    <!-- ვამატებთ favicon-ებს ყველა საჭირო ფორმატში -->
+    <link rel="icon" type="image/png" href="/icons/s.png">
+<!-- ვამატებთ favicon-ებს base64 ფორმატში -->
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAACAASURBVHic7d15nFxlnffxzzl19b7v6e50Z9/3kLCELSCbiKAoKqKjjjM6ozM6M/rMqM/jMuM2zgwqo6OjqKiIioCyySYkISEJ2feks3f63mr3qjrPH9UdknR3uqvq3FN17/f9euWVpLvq3F93qr51zrnnXkUIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEI    <link rel="apple-touch-icon" href="/icons/s.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Student Selector">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, rgba(255, 0, 79, 0.6), rgba(255, 115, 0, 0.6), rgba(255, 235, 0, 0.6), rgba(63, 255, 108, 0.6), rgba(0, 168, 255, 0.6));
+            background-size: 600% 600%;
+            animation: gradient 15s ease infinite;
+            #groupSizeOptions button.not-recommended {
+    background-color: #ff5722; /* სტაფილოსფერი */
+    color: white;
+  }
+  
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 600px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        .input-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            text-align: center;
+        }
+        #nameInput {
+            padding: 10px;
+            width: 250px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .name-list {
+            margin-top: 20px;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            #groupSizeOptions button.not-recommended {
+    background-color: #ffa500; /* სტაფილოსფერი */
+    color: #fff;
+  }
+  
+        }
+        .name {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .delete-button {
+            cursor: pointer;
+            color: red;
+            font-weight: bold;
+        }
+        .winner {
+            position: fixed;  
+            top: 40%;
+            right: 30%;
+            left: 30%;
+            transform: translate(-50%, -50%); /* ეს უზრუნველყოფს ზუსტ ცენტრირებას */
+            font-size: 4em;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            width: fit-content;
+            max-width: 90vw;
+            margin: 0;
+            /* დავამატოთ ცენტრირების დამხმარე სტილები */
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+  
+        /* როცა winner ჩანს */
+        .winner.show {
+            display: flex;
+        }
+        .pairing-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+        }
+        .groups-list {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .group {
+            margin: 5px;
+            font-size: 18px;
+        }
+        #groupSizeOptions {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        #nameCounter {
+            color: black; /* შევცვალეთ თეთრიდან შავზე */
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 5px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 5px;
+            position: relative;
+            z-index: 2;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        #groupSizeOptions button.recommended {
+            background: linear-gradient(145deg, #28a745, #218838);
+            color: white;
+            border: none;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+            animation: glowGreen 1.5s ease-in-out infinite alternate;
+            transition: all 0.3s ease;
+        }
+  
+        #groupSizeOptions button.not-recommended {
+            background: linear-gradient(145deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+            animation: glowRed 1.5s ease-in-out infinite alternate;
+            transition: all 0.3s ease;
+        }
+  
+        /* ანიმაციები ნათეისთვის */
+        @keyframes glowGreen {
+            from {
+                box-shadow: 0 0 5px rgba(40, 167, 69, 0.5),
+                            0 0 10px rgba(40, 167, 69, 0.5),
+                            0 0 15px rgba(40, 167, 69, 0.5);
+            }
+            to {
+                box-shadow: 0 0 10px rgba(40, 167, 69, 0.7),
+                            0 0 20px rgba(40, 167, 69, 0.7),
+                            0 0 25px rgba(40, 167, 69, 0.7);
+            }
+        }
+  
+        @keyframes glowRed {
+            from {
+                box-shadow: 0 0 5px rgba(220, 53, 69, 0.5),
+                            0 0 10px rgba(220, 53, 69, 0.5),
+                            0 0 15px rgba(220, 53, 69, 0.5);
+            }
+            to {
+                box-shadow: 0 0 10px rgba(220, 53, 69, 0.7),
+                            0 0 20px rgba(220, 53, 69, 0.7),
+                            0 0 25px rgba(220, 53, 69, 0.7);
+            }
+        }
+  
+        /* ჰოვერ ეფექტები */
+        #groupSizeOptions button.recommended:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.8);
+        }
+  
+        #groupSizeOptions button.not-recommended:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.8);
+        }
+  
+        /* Keep the background white initially */
+  body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  }
+  
+  /* Countdown timer in the bottom-right corner */
+  #timer {
+  position: fixed;
+  bottom: 7px;
+  right: 10px;
+  z-index: 10000;
+  font-size: 24px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  }
+  
+  /* Styles for the enlarged view */
+  .enlarged {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .enlarged.show {
+    opacity: 1;
+  }
+  #downloadButton {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #downloadButton:hover {
+            background-color: #45a049;
+        }
+  .enlarged-content {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    text-align: center;
+  }
+  
+  /* Close button for the enlarged view */
+  .close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    background-color: #f44336;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+  }
+  
+  .close-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Style for enlarged groups */
+  .enlarged .group {
+    font-size: 35px; /* შევცვალეთ 53-დან 35-მდე */
+    margin-bottom: 30px;
+    text-transform: uppercase;
+  }
+  /* Hide the message and RGB background initially */
+  #message {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  z-index: 20;
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+  }
+  
+  @keyframes fadeIn {
+  to { opacity: 1; }
+  }
+  
+  /* RGB background animation */
+  @keyframes rgbBackground {
+  0% { background-color: red; }
+  33% { background-color: green; }
+  66% { background-color: blue; }
+  100% { background-color: red; }
+  }
+  
+  /* Animate background after countdown finishes */
+  #rgbBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  animation: rgbBackground 5s infinite;
+  display: none; /* Hidden until the countdown finishes */
+  }
+  
+  /* Password input form */
+  #passwordForm {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  }
+  
+  #passwordForm input {
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 16px;
+  }
+  
+    /* არსებული სტილები... */
+  
+    /* დავამატოთ მედია მოთხოვნები სხვადასხვა ეკრანის ზომებისთვის */
+    @media screen and (max-width: 768px) {
+        .container {
+            max-height: 85vh;
+            margin: 10px;
+            padding: 15px;
+            width: 95%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+  
+        .input-container {
+            position: static;
+            margin: 0 auto 10px auto; /* შევამცირეთ ქვედა margin */
+            width: 100%;
+        }
+  
+        #nameInput {
+            margin-bottom: 5px; /* შევამცირეთ input-ის ქვ���და margin */
+        }
+  
+        #selectStudentButton,
+        #pairStudentsButton {
+            margin: 5px 0; /* შევამცირეთ ღილაკების margin-ები */
+        }
+  
+        #nameCounter {
+            position: sticky;
+            top: 0;
+            margin: 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+  
+        .names-container {
+            margin-top: 5px; /* შევამცირეთ ზედა margin */
+        }
+  
+        .groups-list {
+            padding-bottom: 70px; /* დავამატეთ padding ქვემოთ */
+        }
+  
+        /* ფიქსირებული ქვედა ნაწილი */
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: transparent;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+    }
+  
+    /* კიდევ უფრო პატარა ეკრანებისთვის */
+    @media screen and (max-width: 480px) {
+        .container {
+            margin: 5px auto; /* კიდევ უფრო შევამცირეთ margin პატარა ეკრანებზე */
+            height: 95vh; /* გავზარდეთ სიმაღლე */
+        }
+    }
+  
+    /* დავამატოთ ზოგადი გაუმჯობესებები */
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+  
+    body {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+    }
+  
+    html {
+        height: -webkit-fill-available;
+    }
+  
+    /* შევამციროთ სქროლის საჭიროება */
+    .name-list {
+        max-height: 50vh;
+    }
+  
+    /* დავამატოთ თაჩ ოპტიმიზაცია */
+    button, 
+    .delete-button,
+    .close-button {
+        min-height: 27px; /* შევცვალეთ 44-დან 30-მდე */
+        touch-action: manipulation;
+    }
+  
+    /* გავაუმჯობესოთ სქროლი მობილურზე */
+    .name-list,
+    .enlarged-content {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+  
+    /* დავამატოთ ანიმაციების ოპტიმიზაცია */
+    .winner,
+    .enlarged,
+    button {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+    }
+  
+    /* მობილური ოპტიმიზაციისთვის ახალი სტილები */
+    @media screen and (max-width: 480px) {
+        .input-container {
+            position: static;  /* ფიქსირებული პოზციიდან ჩვეულებრივზე გადავდივართ */
+            width: 90%;
+            margin: 20px auto;
+            z-index: 1;
+        }
+  
+        #timer {
+            bottom: 70px;  /* ქვევით ჩამოვწიეთ ფეისბუქი ღილაკის თავზე */
+            right: 10px;
+            font-size: 18px;
+        }
+  
+        #shutdownVideo {
+            bottom: 10px;
+            left: 70px;  /* გადავწიეთ ფეისბუქის ლოგოს გვერდით */
+        }
+  
+        .container {
+            margin-top: 80px;  /* ზევით დავტოვეთ ადგილი input-ისთვის */
+            width: 95%;
+        }
+  
+        .name-list {
+            max-height: calc(100vh - 300px);  /* დინამიური სიმაღლე */
+            margin-bottom: 120px; /* ადგილი ქვედა ელემენტებისთვის */
+        }
+  
+        #groupSizeOptions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            z-index: 999;
+        }
+    }
+  
+    /* პატარა ეკრანებისთვის დამატებითი ოპტიმიზაცია */
+    @media screen and (max-width: 480px) {
+        #timer {
+            bottom: 6px;
+            font-size: 16px;
+            padding: 5px 8px;
+        }
+  
+        .input-container {
+            margin-top: 10px;
+        }
+  
+        #nameInput {
+            width: 100%;
+            max-width: none;
+        }
+  
+        #shutdownVideo {
+            width: 40px;
+            height: 40px;
+            left: 60px;
+        }
+  
+        .container {
+            margin-top: 60px;
+        }
+    }
+  
+    /* დამა��ებითი ���პტიმიზაცია მაღალი ეკრანებისთვის */
+    @media screen and (min-height: 800px) {
+        .name-list {
+            max-height: calc(100vh - 400px);
+        }
+    }
+  
+    /* საფარი და iOS ოპტიმიზაია */
+    @supports (-webkit-touch-callout: none) {
+        .container {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        #groupSizeOptions {
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+    }
+  
+    /* გადიდების ღილაკის სტილი */
+    #enlargeButton {
+        background: linear-gradient(145deg, #28a745, #218838);
+        color: white;
+        border: none;
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+        animation: glowGreen 1.5s ease-in-out infinite alternate;
+        transition: all 0.3s ease;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+  
+    #enlargeButton:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.8);
+    }
+  
+    /* თუ გსურთ გადიდებული ხედის  მწვანე იყოს */
+    .enlarged {
+        border: 2px solid #28a745;
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+    }
+  
+    /* დახურვის ღილაკიც მწვანე გავხადოთ */
+    .close-button {
+        color: #28a745;
+        transition: all 0.3s ease;
+    }
+  
+    .close-button:hover {
+        color: #218838;
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+  
+  .names-container {
+      flex: 1;
+      overflow-y: auto; /* ვერტიკალური სქროლი */
+      max-height: 40vh; /* სახელების კონტეინერის მაქსიმალური სიმაღლე */
+      margin: 10px 0;
+      padding-right: 5px; /* ადგილი სქროლბარისთვის */
+  }
+  
+  /* სქროლბრის სტილი */
+  .names-container::-webkit-scrollbar {
+      width: 6px;
+  }
+  
+  .names-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+  }
+  
+  .names-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+  }
+  
+  .names-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* მობილური ვ��რსიისთვის */
+  @media (max-width: 480px) {
+      .container {
+          max-height: 85vh;
+          margin: 10px;
+          padding: 15px;
+      }
+  
+      .names-container {
+          max-height: 45vh;
+      }
+  }
+  
+  /* ჯგუფების სიის სტილები */
+  .groups-list {
+      max-height: 50vh; /* ეკრანის სიმაღლის 50% */
+      overflow-y: auto;
+      margin: 10px 0;
+      padding-right: 5px;
+  }
+  
+  /* სქროლბარის სტილი */
+  .groups-list::-webkit-scrollbar {
+      width: 6px;
+  }
+  
+  .groups-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+  }
+  
+  .groups-list::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+  }
+  
+  .groups-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Desktop ვერსიისთვის */
+  @media screen and (min-width: 769px) {
+      .container {
+          width: 600px;
+          max-height: 85vh; /* მაქსიმუმ ეკრანის 85% */
+          margin: 20px auto;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden; /* გარე სქროლის პრევენცია */
+      }
+  
+      .name-list {
+          max-height: 30vh; /* ეკრანის 30% სახელებისთვის */
+          overflow-y: auto;
+          margin: 10px 0;
+      }
+  
+      .groups-list {
+          max-height: 50vh; /* ეკრანის 35% ჯგუფებისთვ���ს */
+          overflow-y: auto;
+          margin: 10px 0;
+      }
+  
+      /* სქროლბარების სტილი */
+      .name-list::-webkit-scrollbar,
+      .groups-list::-webkit-scrollbar {
+          width: 6px;
+      }
+  
+      .name-list::-webkit-scrollbar-track,
+      .groups-list::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 3px;
+      }
+  
+      .name-list::-webkit-scrollbar-thumb,
+      .groups-list::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
+      }
+  }
+  
+  /* განახლებული ანიმაციის სტილები */
+  @keyframes highlightGreen {
+      0% { background-color: white; }
+      50% { background-color: rgba(40, 167, 69, 0.3); }
+      100% { background-color: white; }
+  }
+  
+  @keyframes highlightRed {
+      0% { background-color: white; }
+      50% { background-color: rgba(220, 53, 69, 0.3); }
+      100% { background-color: white; }
+  }
+  
+  .highlight-green {
+      animation: highlightGreen 1s ease;
+      position: relative;
+      z-index: 100;
+  }
+  
+  .highlight-red {
+      animation: highlightRed 1s ease;
+      position: relative;
+      z-index: 100;
+  }
+  
+  /* სახელების სიის სტილები */
+  .name {
+      padding: 8px 15px;
+      margin: 5px 0;
+      background: white;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+  }
+  
+  /* Desktop ვერსიისთვის */
+  @media screen and (min-width: 769px) {
+      .name-list {
+          position: relative;
+          z-index: 1;
+      }
+  
+      .name {
+          will-change: background-color;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+      }
+  
+      .highlight-green,
+      .highlight-red {
+          will-change: background-color;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+      }
+  }
+  
+  @media screen and (max-width: 480px) {
+      .name-list {
+          max-height: 45vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+      }
+  
+      .groups-list {
+          max-height: 35vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+      }
+      
+      #groupSizeOptions {
+          position: sticky;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.95);
+          padding: 10px;
+          z-index: 100;
+          box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      }
+  }
+  
+  /* მობილური ოპტიმიზაციისთვის ახალი სტილები */
+  @media screen and (max-width: 480px) {
+      .input-container {
+          position: static;
+          width: 95%;
+          margin: 10px auto;
+      }
+  
+      #nameInput {
+          width: 100%;
+          padding: 8px;
+          font-size: 14px;
+      }
+  
+      button {
+          padding: 6px 10px;
+          font-size: 13px;
+          margin: 3px;
+          min-height: 25px;
+      }
+  
+      #groupSizeOptions {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 3px;
+          padding: 5px;
+      }
+  
+      #groupSizeOptions button {
+          font-size: 12px;
+          padding: 5px;
+          min-width: auto;
+      }
+  
+      .name {
+          padding: 6px 10px;
+          font-size: 13px;
+      }
+  
+      .group {
+          font-size: 13px;
+          margin: 3px 0;
+      }
+  
+      .enlarged .group {
+          font-size: 24px;
+      }
+  
+      #timer {
+          font-size: 14px;
+          padding: 5px 8px;
+          bottom: 5px;
+          right: 5px;
+      }
+  
+      #shutdownVideo {
+          width: 35px;
+          height: 35px;
+          bottom: 5px;
+          left: 5px;
+      }
+  
+      #downloadButton {
+          padding: 6px 12px;
+          font-size: 13px;
+          bottom: 10px;
+          left: 50px;
+      }
+  
+      .container {
+          padding: 10px;
+          margin: 5px;
+          max-height: 85vh;
+      }
+  
+      #nameCounter {
+          font-size: 14px;
+          padding: 3px;
+          margin: 5px 0;
+      }
+  
+      .winner {
+          font-size: 2.5em;
+          padding: 15px;
+      }
+  }
+    </style>
+    <!-- Firebase იმპორტები დავამატოთ head-ში -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, onValue, update, get } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+  
+        // Firebase კონფიგურაცია
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAFv9qvvt6QrV-WwUaBD8SS1eOZAhw-hE",
+            authDomain: "site-access-contro.firebaseapp.com",
+            databaseURL: "https://site-access-contro-default-rtdb.firebaseio.com/",
+            projectId: "site-access-contro",
+            storageBucket: "site-access-contro.appspot.com",
+            messagingSenderId: "657592968002",
+            appId: "1:657592968002:web:763eb114220653f7addedb",
+            measurementId: "G-87RM2Z6F0S"
+        };
+  
+        // Firebase ინიციალიზაცია
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+  
+        // მომხმარებლის სტატუსის შემოწმება
+        function checkUserAccess() {
+            const uniqueCode = localStorage.getItem('uniqueCode');
+            if (!uniqueCode) {
+                window.location.href = 'request.html';
+                return;
+            }
+  
+            const userRef = ref(database, `activeUsers/${uniqueCode}`);
+            onValue(userRef, (snapshot) => {
+                const userData = snapshot.val();
+                if (!userData || userData.blocked) {
+                    // წავშალოთ ლოკალური მონაცემები და გადავამისამართოთ
+                    localStorage.removeItem('uniqueCode');
+                    localStorage.removeItem('accessApproved');
+                    localStorage.removeItem('remainingTime');
+                    localStorage.removeItem('lastUpdateTime');
+                    localStorage.removeItem('siteStatus');
+                    window.location.href = 'request.html';
+                }
+            });
+        }
+  
+        // მომხმარებლის აქტივობის განახლება
+        function updateUserActivity() {
+            const uniqueCode = localStorage.getItem('uniqueCode');
+            if (uniqueCode) {
+                const updates = {};
+                updates[`activeUsers/${uniqueCode}/lastActive`] = Date.now();
+                update(ref(database), updates);
+            }
+        }
+  
+        // პერიოდული შემოწმება
+        setInterval(() => {
+            checkUserAccess();
+            updateUserActivity();
+        }, 5000);
+  
+        // საწყისი შემოწმება
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserAccess();
+            updateUserActivity();
+        });
+  
+        // გლობალურად გავხადოთ ხელმისაწვდომი
+        window.checkUserAccess = checkUserAccess;
+        window.updateUserActivity = updateUserActivity;
+    </script>
+  </head>
+  <body style="background-color: white;"><div id="product-content" style="display: block;">
+    <!-- პროდუ��ტის კო���ტენტი -->
+    
+  </div>
+  <button id="downloadButton" style="display:none;">ჩამოტვირთვა</button>
+  <div id="timer" style="display: block;">დრო: 36503290 წ��მი</div>
+  <div id="rgbBackground" style="display: none;"></div>
+  <!-- პაროლის ფორმა -->
+  
+  <a id="shutdownVideo" href="https://www.facebook.com/profile.php?id=61567812722184" target="_blank" style="display: block; position: fixed; bottom: 10px; left: 10px; z-index: 10000; pointer-events: auto;">
+    <div style="display: inline-block;
+                width: 50px;
+                height: 50px;
+                background: #1877f2;
+                color: white;
+                text-decoration: none;
+                border-radius: 50%;
+                text-align: center;
+                line-height: 50px;
+                font-family: Arial;
+                font-weight: bold;
+                font-size: 28px;">
+        f
+    </div>
+  </a>
+  
+  
+    <div class="container">
+        <div class="input-container">
+            <input type="text" id="nameInput" placeholder="შეიყვანეთ მოსწავლის სახელი">
+            <button id="addNameButton">დამატება</button>
+        </div>
+        <button id="selectStudentButton">მოოსწავლის არჩევა</button>
+        <button id="pairStudentsButton" class="pairing-button">კლასების დამატება</button>
+        <div id="nameCounter">სულ სტუდენტები: 0</div>
+        <div id="nameList" class="name-list"></div>
+        <div id="winnerDisplay" class="winner"></div>
+        <div id="groupsList" class="groups-list"></div>
+        <div id="groupSizeOptions">
+            <button id="enlargeButton">გადიდება🔍</button>
+            <button onclick="askGroupChoice(2)">2</button>
+            <button onclick="askGroupChoice(3)">3</button>
+            <button onclick="askGroupChoice(4)">4</button>
+            <button onclick="askGroupChoice(5)">5</button>
+            <button onclick="askGroupChoice(6)">6</button>
+            <button onclick="askGroupChoice(7)">7</button>
+        </div>
+        <!-- HTML ნაწილშ��� დავამა��ოთ გადიდების ღილაკი -->
+    </div>
+  <script>
+    const JSONBIN_API_KEY = '$2a$10$irNeeadxzMPL4iu242bQp..s2Ebyna0Df.f8oblrkk1UZPC2171Le';
+  const JSONBIN_BIN_ID = '6710f973e41b4d34e44455fa';
+  
+  async function getUsedPasswords() {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      headers: {
+        'X-Master-Key': JSONBIN_API_KEY
+      }
+    });
+    const data = await response.json();
+    return data.record.usedPasswords || [];
+  } catch (error) {
+    console.error('Error fetching used passwords:', error);
+    return [];
+  }
+  }
+  
+  
+  async function updateUsedPasswords(usedPasswords) {
+  try {
+    await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify({ usedPasswords })
+    });
+  } catch (error) {
+    console.error('Error updating used passwords:', error);
+  }
+  }
+  
+  
+  async function checkPassword() {
+  const passwordInput = document.getElementById('passwordInput').value;
+  const usedPasswords = await getUsedPasswords();
+  
+  if (passwords.includes(passwordInput) && !usedPasswords.includes(passwordInput)) {
+    usedPasswords.push(passwordInput);
+    await updateUsedPasswords(usedPasswords);
+    
+    passwordForm.style.display = 'none';
+    startCountdown();
+  } else if (usedPasswords.includes(passwordInput)) {
+    alert('ეს პარლი უკვე გმყენებულია. გთხოვთ, სცადოთ სხვა.');
+  } else {
+    alert('არასწორი პაროლი. სცადეთ ხელახლა.');
+  }
+  }
+  
+  async function resetUsedPasswords() {
+  await updateUsedPasswords([]);
+  alert('ყველა პაროლი განულებულია.');
+  }
+  
+  async function checkIfAllPasswordsUsed() {
+  const usedPasswords = await getUsedPasswords();
+  if (usedPasswords.length === passwords.length) {
+    alert('ყველა პაროლი გამოყენებულია. გთოვთ, დაუკავშირდეთ ადმინისტრატორს.');
+    // აქ შეგიძლიათ დაამატოთ დამატებითი ლოგიკა, მაგლითად, სიტის დაბლოკვა
+  }
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // აქ უნდა იყოს თქვენი კოდის დანარჩენი ნაწილ
+  });
+    let students = [];
+    let availableStudents = [];
+    let templates = JSON.parse(localStorage.getItem('templates')) || {};
+  
+    const nameInput = document.getElementById('nameInput');
+    const addNameButton = document.getElementById('addNameButton');
+    const selectStudentButton = document.getElementById('selectStudentButton');
+    const pairStudentsButton = document.getElementById('pairStudentsButton');
+    const groupSizeOptions = document.getElementById('groupSizeOptions');
+    const nameList = document.getElementById('nameList');
+    const winnerDisplay = document.getElementById('winnerDisplay');
+    const groupsList = document.getElementById('groupsList');
+    const nameCounter = document.getElementById('nameCounter');
+  
+    addNameButton.addEventListener('click', addStudent);
+    selectStudentButton.addEventListener('click', selectRandomStudent);
+  
+    function addStudent() {
+        const name = nameInput.value.trim();
+  
+        if (name.includes("=")) {
+            const [templateName, templateContent] = name.split("=").map(item => item.trim());
+            if (templateContent.startsWith('"') && templateContent.endsWith('"')) {
+                const individualNames = templateContent.slice(1, -1).split(/\s+/);
+                templates[templateName] = individualNames;
+                localStorage.setItem('templates', JSON.stringify(templates));
+                alert(`შაბლონი "${templateName}" დამატებულია`);
+            }
+        } else if (templates[name]) {
+            students.push(...templates[name]);
+            availableStudents.push(...templates[name]);
+        } else if (name) {
+            students.push(name);
+            availableStudents.push(name);
+        }
+        
+        nameInput.value = '';
+        updateNameList();
+        updatePairButtonState();
+        updateButtonHighlighting();
+    }
+  
+    function updateNameList() {
+        nameList.innerHTML = '';
+        students.forEach((student, index) => {
+            const nameElement = document.createElement('div');
+            nameElement.className = 'name';
+            nameElement.innerHTML = `
+                ${student}
+                <span class="delete-button" onclick="deleteStudent(${index})">X</span>
+            `;
+            nameList.appendChild(nameElement);
+        });
+        nameCounter.textContent = `სულ სტუდენტები: ${students.length}`;
+    }
+  
+    function deleteStudent(index) {
+        students.splice(index, 1);
+        availableStudents = [...students];
+        updateNameList();
+        updatePairButtonState();
+        updateButtonHighlighting();
+    }
+  
+    function updatePairButtonState() {
+        if (students.length < 4) {
+            pairStudentsButton.disabled = true;
+        } else {
+            pairStudentsButton.disabled = false;
+        }
+    }
+  
+    let isSelectionInProgress = false;
+    let selectionTimeout;
+  
+    function selectRandomStudent() {
+      if (availableStudents.length === 0) {
+          availableStudents = [...students];
+      }
+  
+      const randomIndex = Math.floor(Math.random() * availableStudents.length);
+      const selectedStudent = availableStudents.splice(randomIndex, 1)[0];
+  
+      winnerDisplay.textContent = `შერჩეული მოსწავლე: ${selectedStudent}`;
+      winnerDisplay.style.display = 'block';
+  
+      // წინა ტ���იმერი გაწვდილი
+      if (selectionTimeout) {
+          clearTimeout(selectionTimeout);
+      }
+  
+      // დავაყენოთ ახალი ტაიმერი
+      selectionTimeout = setTimeout(() => {
+          winnerDisplay.style.display = 'none';
+          isSelectionInProgress = false; // შერჩევის სტატუსი false
+      }, 7000); // 7 წამი
+  
+      // დავაყენოთ შერჩევის სტატუსი
+      isSelectionInProgress = true;
+  }
+  
+    function distributeGroups(groupSize) {
+        if (groupSize >= students.length) {
+            alert(`ჯგუფი ვერ შეიქმნება ${groupSize}-იანი, სტუდენტ���ბის რაოდენობა ძალიან ცოტაა.`);
+            return;
+        }
+  
+        const shuffled = [...students].sort(() => 0.5 - Math.random());
+        const groups = [];
+        
+        let remainingStudents = students.length;
+        let index = 0;
+  
+        while (remainingStudents > 0) {
+            const currentGroupSize = Math.min(groupSize, remainingStudents);
+  
+            if (remainingStudents === groupSize + 1 && groupSize > 2) {
+                // Adjust to prevent creating a group with only 1 member
+                currentGroupSize--;
+            }
+  
+            groups.push(shuffled.slice(index, index + currentGroupSize));
+            index += currentGroupSize;
+            remainingStudents -= currentGroupSize;
+        }
+  
+        displayGroups(groups);
+    }
+  
+    function displayGroups(groups) {
+        const groupsHTML = groups.map((group, index) => 
+            `<div class="group">ჯგუფი ${index + 1}: ${group.join(', ')}</div>`
+        ).join('');
+  
+        groupsList.innerHTML = groupsHTML;
+    }
+  
+    function updateButtonHighlighting() {
+        document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+            const size = parseInt(button.textContent);
+            button.classList.remove('recommended');
+  
+            if (students.length % size === 0 && students.length >= size) {
+                button.classList.add('recommended');
+            }
+        });
+    }
+    function distributeGroups(groupSize) {
+    // Prevent group creation if group size equals or is greater than the number of students
+    if (groupSize >= students.length) {
+        alert(`გუფი ვერ შეიქმნება ${groupSize}-იანი, სტუდენების რაოდენბა ძალიან ცოტაა.`);
+        return;
+    }
+  
+    // Calculate the remainder when dividing the number of students by the group size
+    const remainder = students.length % groupSize;
+  
+    // If there's a remainder of 1, create groups and add the extra student to one group
+    if (remainder === 1) {
+        const adjustedGroupSize = groupSize;
+        const groups = [];
+        const shuffled = [...students].sort(() => 0.5 - Math.random());
+  
+        let remainingStudents = students.length;
+        let index = 0;
+  
+        while (remainingStudents > 0) {
+            const currentGroupSize = Math.min(adjustedGroupSize, remainingStudents);
+  
+            // Create groups with adjusted size to accommodate the remainder
+            if (remainingStudents === adjustedGroupSize + 1) {
+                // Adjust the last group size
+                groups.push(shuffled.slice(index, index + adjustedGroupSize - 1));
+                index += adjustedGroupSize - 1;
+                remainingStudents -= adjustedGroupSize - 1;
+            } else {
+                groups.push(shuffled.slice(index, index + currentGroupSize));
+                index += currentGroupSize;
+                remainingStudents -= currentGroupSize;
+            }
+        }
+  
+        // Add the extra student to the first group (or any group as per your preference)
+        if (groups.length > 0) {
+            groups[0].push(shuffled[index]);
+        }
+  
+        displayGroups(groups);
+        return;
+    }
+  
+    // Normal distribution without remainder of 1
+    if (students.length % groupSize === 0) {
+        const shuffled = [...students].sort(() => 0.5 - Math.random());
+        const groups = [];
+        
+        let remainingStudents = students.length;
+        let index = 0;
+  
+        while (remainingStudents > 0) {
+            const currentGroupSize = Math.min(groupSize, remainingStudents);
+  
+            groups.push(shuffled.slice(index, index + currentGroupSize));
+            index += currentGroupSize;
+            remainingStudents -= currentGroupSize;
+        }
+  
+        displayGroups(groups);
+    }
+  }
+  
+  function updateButtonHighlighting() {
+      document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+          const size = parseInt(button.textContent);
+          button.classList.remove('recommended', 'not-recommended');
+  
+          // შევცვალოთ შემოწმების პირობა
+          if (students.length >= 4 && students.length <= 36 && size >= 2 && size <= 7) {
+              if (students.length % size === 0) {
+                  button.classList.add('recommended');
+                  button.title = 'ჯგუფები ზუსტად გადანაწილდებიან';
+              } else {
+                  button.classList.add('not-recommended');
+                  button.title = 'ჯგუფის წევრები ზუსტად ვერ გადანაწილდებიან, მაგრამ სხვაობა მცირე იქნება';
+              }
+          } else {
+              button.classList.remove('recommended', 'not-recommended');
+              button.title = '';
+          }
+      });
+  }
+  
+  function distributeGroups(groupSize) {
+    // Prevent group creation if conditions are not met
+    if (groupSize < 2 || groupSize > 7 || students.length < 4 || students.length > 30) {
+        alert(`ჯგუფების შექმნა შესაძლებელია 5-დან 30-მდე სტუდენტისთვის და 2-დან 7-მდე ჯგუფის ზომსთვის.`);
+        return;
+    }
+  
+    const totalStudents = students.length;
+    const numberOfGroups = Math.ceil(totalStudents / groupSize);
+    const minGroupSize = Math.floor(totalStudents / numberOfGroups);
+    const remainder = totalStudents % numberOfGroups;
+  
+    // Create an array to hold our groups
+    const groups = [];
+  
+    // Shuffle the students array
+    const shuffledStudents = [...students].sort(() => 0.5 - Math.random());
+  
+    let currentIndex = 0;
+  
+    // Distribute students into groups
+    for (let i = 0; i < numberOfGroups; i++) {
+        const currentGroupSize = minGroupSize + (i < remainder ? 1 : 0);
+        groups.push(shuffledStudents.slice(currentIndex, currentIndex + currentGroupSize));
+        currentIndex += currentGroupSize;
+    }
+  
+    displayGroups(groups);
+  }
+  
+  function distributeGroups(groupSize) {
+    // Prevent group creation if conditions are not met
+    if (groupSize < 2 || groupSize > 7 || students.length < 4 || students.length > 30) {
+        alert(`ჯგუფების შექმნა შესაძლებელია 5-დან 30-მდე სტუდენტისთვის და 2-დან 7-მდე ჯგუფის ზომსთვის.`);
+        return;
+    }
+  
+    const totalStudents = students.length;
+    const baseGroupCount = Math.floor(totalStudents / groupSize);
+    const remainder = totalStudents % groupSize;
+  
+    // Create an array to hold our groups
+    const groups = [];
+  
+    // Shuffle the students array
+    const shuffledStudents = [...students].sort(() => 0.5 - Math.random());
+  
+    let currentIndex = 0;
+  
+    // Distribute students into groups
+    for (let i = 0; i < baseGroupCount; i++) {
+        const currentGroupSize = groupSize + (i < remainder ? 1 : 0);
+        groups.push(shuffledStudents.slice(currentIndex, currentIndex + currentGroupSize));
+        currentIndex += currentGroupSize;
+    }
+  
+    // If there are any remaining students, add them to the last group
+    if (currentIndex < totalStudents) {
+        groups[groups.length - 1].push(...shuffledStudents.slice(currentIndex));
+    }
+  
+    displayGroups(groups);
+  }
+  
+  function updateButtonHighlighting() {
+    document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+        const size = parseInt(button.textContent);
+        button.classList.remove('recommended', 'not-recommended');
+  
+        if (students.length >= 5 && size >= 2 && size <= 7) {
+            if (students.length % size === 0) {
+                button.classList.add('recommended');
+                button.title = 'ჯგუფები ზუსტად გადნაწილდებიან';
+            } else {
+                button.classList.add('not-recommended');
+                button.title = 'ჯგუფი წევრები ზუსტად ერ გადანაწილდებიან, მარმ სხვაობა მცირე იქნება';
+            }
+        } else {
+            button.classList.remove('recommended', 'not-recommended');
+            button.title = '';
+        }
+    });
+  }
+  
+  // გლობალური ცვლადები
+  let countdownTime = 40; // 40 წამი
+  let timerInterval;
+  let rightClickStartTime;
+  let isRightClickHeld = false;
+  
+  // ელემენტების მოძიება
+  const timerElement = document.getElementById('timer');
+  const messageElement = document.getElementById('message');
+  const rgbBackground = document.getElementById('rgbBackground');
+  const productContent = document.getElementById('product-content');
+  const passwordForm = document.getElementById('passwordForm');
+  
+  // შევამოწმოთ საიტი��� მდგომარეობა
+  function checkSiteStatus() {
+      const siteStatus = localStorage.getItem('siteStatus');
+      const remainingTime = localStorage.getItem('remainingTime');
+      const accessApproved = localStorage.getItem('accessApproved');
+  
+      if (!accessApproved) {
+          window.location.href = 'request.html';
+          return;
+      }
+  
+      if (siteStatus === 'shutdown') {
+          window.location.href = 'request.html';
+          return;
+      }
+  
+      if (remainingTime && parseInt(remainingTime) <= 0) {
+          window.location.href = 'request.html';
+          return;
+      }
+  
+      countdownTime = parseInt(remainingTime) || 10; // Default to 10 seconds if not set
+      startCountdown();
+  }
+  
+  function startCountdown() {
+      if (timerInterval) {
+          clearInterval(timerInterval);
+      }
+      
+      let savedTime = localStorage.getItem('remainingTime');
+      
+      if (!savedTime) {
+          savedTime = 10; // 10 წამი
+          localStorage.setItem('remainingTime', savedTime);
+      }
+      
+      countdownTime = parseInt(savedTime);
+      
+      function updateTimer() {
+          if (countdownTime <= 0) {
+              clearInterval(timerInterval);
+              localStorage.setItem('siteStatus', 'shutdown');
+              window.location.href = 'request.html';
+              return;
+          }
+  
+          timerElement.textContent = `დრო: ${countdownTime} წ��მი`;
+          
+          countdownTime--;
+          localStorage.setItem('remainingTime', countdownTime);
+      }
+  
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+  }
+  
+  // დავამატოთ ეს ფუნქცია localStorage-ის ასასუფთავებლად რ��დესაც გვერდი იხურება
+  window.addEventListener('beforeunload', function() {
+      // არ წავშალოთ countdownTime
+      // localStorage.removeItem('countdownTime');
+  });
+  
+  // დავამაოთ ტაიერის ელემენტი HTML-ში თუ არ არსებობს
+  if (!document.getElementById('timer')) {
+      const timerElement = document.createElement('div');
+      timerElement.id = 'timer';
+      timerElement.style.cssText = `
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          padding: 10px;
+          background-color: rgba(0, 0, 0, 0.7);
+          color: white;
+          border-radius: 5px;
+          font-size: 18px;
+          z-index: 1000;
+      `;
+      document.body.appendChild(timerElement);
+  }
+  
+  function showShutdownState() {
+      if (timerInterval) {
+          clearInterval(timerInterval);
+      }
+      const timerElement = document.getElementById('timer');
+      timerElement.style.display = 'none';
+      document.body.style.backgroundColor = 'black';
+      document.getElementById('rgbBackground').style.display = 'block';
+      document.getElementById('message').style.display = 'block';
+      document.getElementById('product-content').style.display = 'none';
+      document.getElementById('passwordForm').style.display = 'block';
+      localStorage.setItem('siteStatus', 'shutdown');
+  }
+  
+  function checkPassword() {
+  const passwordInput = document.getElementById('passwordInput').value;
+  if (passwordInput === 'paroliparoli') {
+    passwordForm.style.display = 'none';
+    startCountdown();
+  } else {
+    alert('არასწორი პაროლი. სცადეთ ხელახლა.');
+  }
+  }
+  
+  function closePasswordForm() {
+  passwordForm.style.display = 'none';
+  }
+  
+  // მარჯვენა ღილაკის დაჭერის დამუშავება
+  document.addEventListener('mousedown', function(event) {
+    if (event.button === 2) { // 2 არის მარჯვენა ღილაკის კოდი
+        event.preventDefault(); // სტანდარტული კონტექსტური მენიუს გამოჩენის პრევენცია
+        rightClickStartTime = Date.now();
+        isRightClickHeld = true;
+  }
+  });
+  
+  document.addEventListener('mouseup', function(event) {
+  if (event.button === 2) {
+    isRightClickHeld = false;
+  }
+  });
+  
+  // კონტექსტური მენიუს გა���ოჩენი����� პრევენცია
+  document.addEventListener('contextmenu', function(event) {
+  event.preventDefault();
+  });
+  
+  // ყოველ 100 მილიწამში ვამოწმებთ, ხომ არ გავიდა 10 წამი მარჯვენა ღილაკის დაჭერდან
+  setInterval(function() {
+  if (isRightClickHeld && Date.now() - rightClickStartTime >= 10000) {
+    isRightClickHeld = false;
+    // არ დაიწყოს დროის ათვლა ხელახლა, თუ პაროლი არ არს შეყვანილი
+  }
+  }, 100);
+  
+  // გვერდის ჩატვირთვისას შვამოწმოთ საიტის მდგომარეობა
+  document.addEventListener('DOMContentLoaded', checkSiteStatus);
+  
+  // CSS სტილები (დაამატეთ თქვენს არსებულ CSS-ს)
+  /*
+  #groupSizeOptions button.recommended {
+    background-color: #28a745; // მწვანე
+  }
+  
+  #groupSizeOptions button.not-recommended {
+    background-color: #dc3545; // წითელი
+    color: white;
+  }
+  */function distributeGroups(groupSize) {
+    // შევამოწმოთ, რომ ტუდენტების რაოდენობა 5-დან 35-მდეა
+    if (students.length < 4 || students.length > 50) {
+        alert(`ჯგუფების შექმნა შესაძლებელია 5-დან 35-დე სტუდენტისთვის.`);
+        return;
+    }
+  
+    // შევამოწმოთ, რომ ჯგუფის ზომა 2-დან 7-მდეა
+    if (groupSize < 2 || groupSize > 7) {
+        alert(`ჯგუფის ზ��მა უნდა იყოს 2-დან 7-მდე.`);
+        return;
+    }
+  
+    const totalStudents = students.length;
+    
+    // გამოვთვლოთ ჯგუფების რაოდენობა, მინიმუმ 2
+    let numberOfGroups = Math.max(2, Math.min(Math.floor(totalStudents / groupSize), Math.floor(totalStudents / 2)));
+    
+    // გამოვვალოთ ინიმალური და მაქსიმალური ჯგუფის ზომები
+    const minGroupSize = Math.floor(totalStudents / numberOfGroups);
+    const maxGroupSize = Math.ceil(totalStudents / numberOfGroups);
+    const numberOfLargerGroups = totalStudents % numberOfGroups;
+  
+    // შევქმნათ მასივი ჯგუფების ზომებით
+    const groupSizes = Array(numberOfGroups).fill(minGroupSize);
+    for (let i = 0; i < numberOfLargerGroups; i++) {
+        groupSizes[i] = maxGroupSize;
+    }
+  
+    // შევქმნათ ა��ვი ჯგუფებისთვის
+    const groups = [];
+  
+    // არეულად დავლაგოთ სტუდენტები
+    const shuffledStudents = [...students].sort(() => 0.5 - Math.random());
+  
+    let currentIndex = 0;
+    for (const size of groupSizes) {
+        groups.push(shuffledStudents.slice(currentIndex, currentIndex + size));
+        currentIndex += size;
+    }
+  
+    displayGroups(groups);
+  }function updateButtonHighlighting() {
+    document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+        const size = parseInt(button.textContent);
+        button.classList.remove('recommended', 'not-recommended');
+  
+        // შევცვალოთ შემოწმების პირობა
+          if (students.length >= 4 && students.length <= 36 && size >= 2 && size <= 7) {
+              if (students.length % size === 0) {
+                  button.classList.add('recommended');
+                  button.title = 'ჯგუფები ზუსტად გადანაწილდებიან';
+              } else {
+                  button.classList.add('not-recommended');
+                  button.title = 'ჯგუფის წევრები ზუსტად ვერ გადანაწილდებიან, მაგრამ სხვაობა მცირე იქნება';
+              }
+          } else {
+              button.classList.remove('recommended', 'not-recommended');
+              button.title = '';
+          }
+      });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const enlargeButton = document.getElementById('enlargeButton');
+    const groupsList = document.getElementById('groupsList');
+    const container = document.querySelector('.container');
+  
+    enlargeButton.addEventListener('click', function() {
+      // Create a new div for the enlarged view
+      const enlargedView = document.createElement('div');
+      enlargedView.className = 'enlarged';
+  
+      const enlargedContent = document.createElement('div');
+      enlargedContent.className = 'enlarged-content';
+      enlargedContent.innerHTML = groupsList.innerHTML;
+  
+      enlargedView.appendChild(enlargedContent);
+  
+      // Add a close button
+      const closeButton = document.createElement('span');
+      closeButton.innerHTML = '&times;';
+      closeButton.className = 'close-button';
+      enlargedView.appendChild(closeButton);
+  
+      // Add the enlarged view to the body
+      document.body.appendChild(enlargedView);
+  
+      // Animate the enlargement
+      setTimeout(() => {
+        enlargedView.classList.add('show');
+      }, 50);
+  
+      // Close button functionality
+      closeButton.addEventListener('click', function() {
+        enlargedView.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(enlargedView);
+        }, 300);
+      });
+    });
+  });
+  
+  // Modify the existing displayGroups function to update both the original and enlarged view if it exists
+  function displayGroups(groups) {
+    const groupsHTML = groups.map((group, index) => 
+      `<div class="group">ჯგუფი ${index + 1}: ${group.join(', ')}</div>`
+    ).join('');
+  
+    groupsList.innerHTML = groupsHTML;
+  
+    // Update the enlarged view if it exists
+    const enlargedContent = document.querySelector('.enlarged-content');
+    if (enlargedContent) {
+      enlargedContent.innerHTML = groupsHTML;
+    }
+  }
+  function updateButtonHighlighting() {
+    document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+        const size = parseInt(button.textContent);
+        button.classList.remove('recommended', 'not-recommended', 'pulse');
+  
+        if (students.length >= 5 && students.length <= 50 && size >= 2 && size <= 7) {
+            if (students.length % size === 0) {
+                button.classList.add('recommended', 'pulse');
+                button.title = `${students.length / size} ჯგუფი, თითოეულში ${size} სტუდენტით`;
+            } else {
+                button.classList.add('not-recommended');
+                button.title = 'არათანაბარი განაწილება';
+            }
+        } else {
+            button.title = '';
+        }
+    });
+  }
+  // შევამოწოთ საიტის მდგომარეობა
+  function checkSiteStatus() {
+  const siteStatus = localStorage.getItem('siteStatus');
+  const remainingTime = localStorage.getItem('remainingTime');
+  const accessApproved = localStorage.getItem('accessApproved');
+  
+  if (isFirstVisit) {
+    localStorage.setItem('isFirstVisit', 'false');
+    showShutdownState();
+    return;
+  }
+  }
+  
+  // გვერდის ჩატ���რთვისას შევამოწმოთ საიტს მდგომარეობა
+  document.addEventListener('DOMContentLoaded', checkSiteStatus);
+  if (!localStorage.getItem('isFirstVisit')) {
+  localStorage.setItem('isFirstVisit', 'true');
+  }
+  // ფუნქცია შაბლონები ექსპორტისთვის
+  function exportTemplates() {
+    const templates = JSON.parse(localStorage.getItem('templates')) || {};
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templates));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "templates.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+  
+  // ფუნქცია შაბლონების იმპორტსთვის
+  function importTemplates(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const templates = JSON.parse(e.target.result);
+            localStorage.setItem('templates', JSON.stringify(templates));
+            alert('შაბლონები წარმატებით დიმპორტდა!');
+            // განაახლეთ ინტერფეისი საჭიოების შემთხვევაში
+        } catch (error) {
+            alert('შ��ცდომა შაბლონების იმპორტისას. გთხოვთ, შეამოწმეთ ფაილი.');
+        }
+    };
+    reader.readAsText(file);
+  }
+  function addStudent() {
+    const name = nameInput.value.trim();
+  
+    if (name === 'iii123') {
+        exportTemplates();
+        nameInput.value = '';
+        return;
+    }
+  
+    if (name === 'iii1234') {
+        importTemplates();
+        nameInput.value = '';
+        return;
+    }
+  
+    if (name.includes("=")) {
+        const [templateName, templateContent] = name.split("=").map(item => item.trim());
+        if (templateContent.startsWith('"') && templateContent.endsWith('"')) {
+            const individualNames = templateContent.slice(1, -1).split(/\s+/);
+            templates[templateName] = individualNames;
+            localStorage.setItem('templates', JSON.stringify(templates));
+            alert(`შაბლონი "${templateName}" დამატებულია`);
+        }
+    } else if (templates[name]) {
+        students.push(...templates[name]);
+        availableStudents.push(...templates[name]);
+    } else if (name) {
+        students.push(name);
+        availableStudents.push(name);
+    }
+    
+    nameInput.value = '';
+    updateNameList();
+    updatePairButtonState();
+    updateButtonHighlighting();
+  }
+  
+  // განვაახლოთ exportTemplates ფუნქცია
+  function exportTemplates() {
+    const templates = JSON.parse(localStorage.getItem('templates')) || {};
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templates));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "templates.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    alert('შაბლონები წარმატებით დაექსპორტდა!');
+  }
+  
+  // განვაახლოთ importTemplates ფუნქცია
+  function importTemplates() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const templates = JSON.parse(e.target.result);
+                localStorage.setItem('templates', JSON.stringify(templates));
+                alert('შაბლოები წარმტებით დაიმპოტდა!');
+            } catch (error) {
+                alert('შეცდომა შაბლონების იმპორტისას. გთხოვთ, შეამოწმეთ ფაილი.');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+  }
+  
+  // დავამატოთ ეს ფუნქცია, რომ ავტომატურად დავტვირთოთ შაბლონები
+  function loadTemplates() {
+    templates = JSON.parse(localStorage.getItem('templates')) || {};
+  }
+  
+  // გამოვიძახოთ ეს ფუნქცი�� გვერდის ჩატვირთვისას
+  document.addEventListener('DOMContentLoaded', function() {
+    loadTemplates();
+    checkSiteStatus();
+  });
+  
+  // მოდიფიცირებული updateButtonHighlighting ფუნქცია
+  function updateButtonHighlighting() {
+    document.querySelectorAll('#groupSizeOptions button').forEach(button => {
+        const size = parseInt(button.textContent);
+        button.classList.remove('recommended', 'not-recommended', 'pulse');
+  
+        if (students.length >= 5 && students.length <= 50 && size >= 2 && size <= 7) {
+            if (students.length % size === 0 && students.length !== size) {
+                button.classList.add('recommended', 'pulse');
+                button.title = `${students.length / size} ჯგუფი, თითოელში ${size} სტდენტით`;
+            } else {
+                button.classList.add('not-recommended');
+                button.title = 'რათანბარი განაწილება';
+            }
+        } else {
+            button.title = '';
+        }
+    });
+  }
+  
+  // მოდიფიცირებული distributeGroups ფუნქცია
+  function distributeGroups(groupSize) {
+    if (students.length < 5 || students.length > 50) {
+        alert(`ჯგუფების შექმნა შესაძლებელია 5-დან 35-მდე სტუდენტისთვის.`);
+        return;
+    }
+  
+    if (groupSize < 2 || groupSize > 7) {
+        alert(`ჯუფის ზომა უნდა იყოს 2-დან 7-მდე.`);
+        return;
+    }
+  
+    const totalStudents = students.length;
+    let numberOfGroups = Math.max(2, Math.min(Math.floor(totalStudents / groupSize), Math.floor(totalStudents / 2)));
+    
+    const minGroupSize = Math.floor(totalStudents / numberOfGroups);
+    const maxGroupSize = Math.ceil(totalStudents / numberOfGroups);
+    const numberOfLargerGroups = totalStudents % numberOfGroups;
+  
+    const groupSizes = Array(numberOfGroups).fill(minGroupSize);
+    for (let i = 0; i < numberOfLargerGroups; i++) {
+        groupSizes[i] = maxGroupSize;
+    }
+  
+    const groups = [];
+    const shuffledStudents = [...students].sort(() => 0.5 - Math.random());
+  
+    let currentIndex = 0;
+    for (const size of groupSizes) {
+        groups.push(shuffledStudents.slice(currentIndex, currentIndex + size));
+        currentIndex += size;
+    }
+  
+    displayGroups(groups);
+  }
+  
+    // გა���ახლე����ლი displayGroups ფუნქცია
+    function displayGroups(groups) {
+      const groupsHTML = groups.map((group, index) => 
+          `<div class="group">ჯგუფ ${index + 1}: ${group.join(', ')}</div>`
+      ).join('');
+  
+      groupsList.innerHTML = groupsHTML;
+  
+      const enlargedContent = document.querySelector('.enlarged-content');
+      if (enlargedContent) {
+          enlargedContent.innerHTML = groupsHTML;
+      }
+    }
+  
+    function addStudent() {
+      const name = nameInput.value.trim();
+  
+      if (name === 'iii123') {
+          exportTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name === 'iii1234') {
+          importTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name.includes("=")) {
+          const [templateName, templateContent] = name.split("=").map(item => item.trim());
+          if (templateContent.startsWith('"') && templateContent.endsWith('"')) {
+              // აქ ვცვით ლოგიკას
+              const individualNames = templateContent.slice(1, -1).split(/\s+/).map(name => {
+                  // თუ სახელში წერტილია, ვცვლით გამოტვებით
+                  return name.replace('.', ' ');
+              });
+              templates[templateName] = individualNames;
+              localStorage.setItem('templates', JSON.stringify(templates));
+              alert(`შაბლონი "${templateName}" დამატებულია`);
+          }
+      } else if (templates[name]) {
+          students.push(...templates[name]);
+          availableStudents.push(...templates[name]);
+      } else if (name) {
+          // აქაც ვამატებთ წ���რტილი დამუშვებას ერთეული სახელებისთვის
+          const processedName = name.replace('.', ' ');
+          students.push(processedName);
+          availableStudents.push(processedName);
+      }
+      
+      nameInput.value = '';
+      updateNameList();
+      updatePairButtonState();
+      updateButtonHighlighting();
+    }
+  
+    // ახალი ფუნქცია შაბლოები წაშლი დიალოგის გამოსაჩენად
+    function showDeleteTemplateDialog() {
+      const dialog = document.createElement('div');
+      dialog.style.position = 'fixed';
+      dialog.style.left = '50%';
+      dialog.style.top = '50%';
+      dialog.style.transform = 'translate(-50%, -50%)';
+      dialog.style.backgroundColor = 'white';
+      dialog.style.padding = '20px';
+      dialog.style.border = '1px solid black';
+      dialog.style.zIndex = '1000';
+  
+      const select = document.createElement('select');
+      for (const templateName in templates) {
+          const option = document.createElement('option');
+          option.value = templateName;
+          option.textContent = templateName;
+          select.appendChild(option);
+      }
+  
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'წაშლა';
+      deleteButton.onclick = function() {
+          const selectedTemplate = select.value;
+          delete templates[selectedTemplate];
+          localStorage.setItem('templates', JSON.stringify(templates));
+          alert(`აბლონი "${selectedTemplate}" წაიშალა`);
+          document.body.removeChild(dialog);
+      };
+  
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'გაუქმება';
+      cancelButton.onclick = function() {
+          document.body.removeChild(dialog);
+      };
+  
+      dialog.appendChild(select);
+      dialog.appendChild(deleteButton);
+      dialog.appendChild(cancelButton);
+  
+      document.body.appendChild(dialog);
+    }
+  
+    // მოდიფიცირებული addStudent ფუნცია
+    function addStudent() {
+      const name = nameInput.value.trim();
+  
+      if (name === 'ექსპორტი') {
+          exportTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name === 'იმპორტი') {
+          importTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name === 'წაშლა') {
+          showDeleteTemplateDialog();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name.includes("=")) {
+          const [templateName, templateContent] = name.split("=").map(item => item.trim());
+          if (templateContent.startsWith('"') && templateContent.endsWith('"')) {
+              const individualNames = templateContent.slice(1, -1).split(/\s+/).map(name => {
+                  return name.replace('.', ' ');
+              });
+              templates[templateName] = individualNames;
+              localStorage.setItem('templates', JSON.stringify(templates));
+              alert(`შაბლონი "${templateName}" დამატებულია`);
+          }
+      } else if (templates[name]) {
+          students.push(...templates[name]);
+          availableStudents.push(...templates[name]);
+      } else if (name) {
+          const processedName = name.replace('.', ' ');
+          students.push(processedName);
+          availableStudents.push(processedName);
+      }
+      
+      nameInput.value = '';
+      updateNameList();
+      updatePairButtonState();
+      updateButtonHighlighting();
+    }
+  
+  
+    // ��ოკალუ�� მეხსიერებაში ვინახავთ გამოყენებულ პაროლებს
+    let usedPasswords = JSON.parse(localStorage.getItem('usedPasswords')) || [];
+  
+    function checkPassword() {
+    const passwordInput = document.getElementById('passwordInput').value;
+  
+    if (passwords.includes(passwordInput) && !usedPasswords.includes(passwordInput)) {
+      // პაროლი სწორია და ჯერ არ გამოყენებულა
+      usedPasswords.push(passwordInput);
+      localStorage.setItem('usedPasswords', JSON.stringify(usedPasswords));
+      
+      passwordForm.style.display = 'none';
+      startCountdown();
+    } else if (usedPasswords.includes(passwordInput)) {
+      alert('ეს პაროლი უკვე გამოყენებულია. გთხოვთ, სცადოთ სხვა.');
+    } else {
+      alert('არასწორი პაროლი. სცადეთ ხელახლა.');
+    }
+    }
+  
+    // ფუნქცია ყველა გამოყენებული აროლის გასაწმენდდ (ადინისტრატორისთვის)
+    function resetUsedPasswords() {
+    usedPasswords = [];
+    localStorage.setItem('usedPasswords', JSON.stringify(usedPasswords));
+    alert('ყველა პაროლი განულებულია.');
+    }
+  
+    // ეს ფუნქცია შეგიძლიათ გამოიძახოთ საიტის გადატვირთვისას ან ახალი სესიის დაწყებისას
+    function checkIfAllPasswordsUsed() {
+    if (usedPasswords.length === passwords.length) {
+      alert('ყველა პაროლი გამოყნებულა. გთხოვთ, დაუკავშირდეთ ადმინისტრატორს.');
+      // ა შეგიძლიათ დაამატოთ დამატებითი ლოგიკა, მაგალითად, სიტის დაბლოკვა
+    }
+    }// ფუნქცია ვებსაიტის ჩამოსატვითად
+    function downloadWebsite() {
+      // მთლიანი HTML-ის მიღება
+      const fullHTML = document.documentElement.outerHTML;
+      
+      // Blob ობიექტის შექმნა HTML შიგთავსით
+      const blob = new Blob([fullHTML], {type: 'text/html'});
+      
+      // URL-ის შექმნა Blob-იდან
+      const url = URL.createObjectURL(blob);
+      
+      // ჩამოსატვირთი ბმულის შექმნა
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'website.html';
+      
+      // ბმულის ამალვა და დაკლიკვა
+      document.body.appendChild(a);
+      a.style.display = 'none';
+      a.click();
+      
+      // ბმულის წაშლა და URL-ის გასუფთავება
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  
+    // მოდიფიცირებული addStudent ფუნქცია
+    function addStudent() {
+      const name = nameInput.value.trim();
+  
+      if (name === 'ჩამოტვირთვა') {
+          downloadWebsite();
+          nameInput.value = '';
+          return;
+      }
+  
+      // დანარჩენი კოდი უცვლელია...
+  
+      if (name === 'iii123') {
+          exportTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name === 'iii1234') {
+          importTemplates();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name === 'წაშლაა') {
+          showDeleteTemplateDialog();
+          nameInput.value = '';
+          return;
+      }
+  
+      if (name.includes("=")) {
+          const [templateName, templateContent] = name.split("=").map(item => item.trim());
+          if (templateContent.startsWith('"') && templateContent.endsWith('"')) {
+              const individualNames = templateContent.slice(1, -1).split(/\s+/).map(name => {
+                  return name.replace('.', ' ');
+              });
+              templates[templateName] = individualNames;
+              localStorage.setItem('templates', JSON.stringify(templates));
+              alert(`შაბლონი "${templateName}" დამატებულია`);
+          }
+      } else if (templates[name]) {
+          students.push(...templates[name]);
+          availableStudents.push(...templates[name]);
+      } else if (name) {
+          const processedName = name.replace('.', ' ');
+          students.push(processedName);
+          availableStudents.push(processedName);
+      }
+      
+      nameInput.value = '';
+      updateNameList();
+      updatePairButtonState();
+      updateButtonHighlighting();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+    const element = document.getElementById('uuidMachine');
+    if (element) {
+      element.textContent = '';
+    }
+    });
+    // ფუქცია კლასის შაბლონის დიალოგის გამოსაჩენად
+    // ფუნქცია კლასის შაბლონის დიალოგის გამოსაჩენად
+    function showClassTemplateDialog() {
+      const dialog = document.createElement('div');
+      dialog.style.cssText = `
+          position: fixed;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          background-color: #f0f0f0;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          z-index: 1000;
+          width: 300px;
+          font-family: Arial, sans-serif;
+      `;
+  
+      const styles = {
+          input: `
+              width: 100%;
+              padding: 8px;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 14px;
+          `,
+          button: `
+              padding: 8px 16px;
+              margin-right: 10px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: background-color 0.3s;
+          `
+      };
+  
+      const templateNameInput = document.createElement('input');
+      templateNameInput.type = 'text';
+      templateNameInput.placeholder = 'შეიყვანეთ კლსის სახელი';
+      templateNameInput.style.cssText = styles.input;
+  
+      const namesTextarea = document.createElement('textarea');
+      namesTextarea.placeholder = 'შეიყვანეთ სახელები და გვარები (თითო ხაზზე ერთი) ';
+      namesTextarea.style.cssText = styles.input + 'height: 150px; resize: vertical;';
+  
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'შენახვა';
+      saveButton.style.cssText = styles.button + 'background-color: #4CAF50; color: white;';
+      saveButton.onmouseover = () => saveButton.style.backgroundColor = '#45a049';
+      saveButton.onmouseout = () => saveButton.style.backgroundColor = '#4CAF50';
+      saveButton.onclick = function() {
+          const templateName = templateNameInput.value.trim();
+          const names = namesTextarea.value.split('\n').map(name => name.trim()).filter(name => name);
+          
+          if (templateName && names.length > 0) {
+              templates[templateName] = names;
+              localStorage.setItem('templates', JSON.stringify(templates));
+              alert(`შაბლონი "${templateName}" დამატებულია ${names.length} სტუდენტით`);
+              document.body.removeChild(dialog);
+          } else {
+              alert('გთხოვთ, შეავსოთ კლასის სახელი და დაამატოთ მინიმუმ ერთი სტუდენტი');
+          }
+      };
+  
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'გაუქმება';
+      cancelButton.style.cssText = styles.button + 'background-color: #f44336; color: white;';
+      cancelButton.onmouseover = () => cancelButton.style.backgroundColor = '#da190b';
+      cancelButton.onmouseout = () => cancelButton.style.backgroundColor = '#f44336';
+      cancelButton.onclick = function() {
+          document.body.removeChild(dialog);
+      };
+  
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'text-align: right; margin-top: 10px;';
+      buttonContainer.appendChild(saveButton);
+      buttonContainer.appendChild(cancelButton);
+  
+      dialog.appendChild(templateNameInput);
+      dialog.appendChild(namesTextarea);
+      dialog.appendChild(buttonContainer);
+      document.body.appendChild(dialog);
+    }
+  
+    // მოდფიცირებული pairStudentsButton-ი event listener
+    pairStudentsButton.addEventListener('click', showClassTemplateDialog);
+    // ოდიფიციებული pairStudentsButton-ის event listener
+    pairStudentsButton.addEventListener('click', showClassTemplateDialog);function downloadSite() {
+        const htmlContent = document.documentElement.outerHTML;
+        const templatesData = JSON.stringify(templates);
+        
+        const combinedContent = `
+        ${htmlContent}
+        <script>
+        // ეს სკრიპტი ჩაიტვირთება გვერდის გახსნისას და ღადგე შალონებს
+        (function() {
+            const templatesData = '${templatesData.replace(/'/g, "\\'")}';
+            localStorage.setItem('templates', templatesData);
+        })();
+        <\/script>
+        `;
+  
+        const blob = new Blob([combinedContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'site_with_templates.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    function showShutdownState() {
+        timerElement.style.display = 'none';
+        document.body.style.backgroundColor = 'black';
+        rgbBackground.style.display = 'block';
+        messageElement.style.display = 'block';
+        productContent.style.display = 'none';
+        passwordForm.style.display = 'block'; // ჩამოტვირთვის ღილაკის გამოჩენა
+        localStorage.setItem('siteStatus', 'shutdown');
+    }
+  
+    function downloadSite() {
+        const htmlContent = document.documentElement.outerHTML;
+        const templatesData = JSON.stringify(templates);
+        
+        const combinedContent = `
+        ${htmlContent}
+        <script>
+        // ეს სკრიპტი ჩაიტვირთება გვერდის გახსნისას და აღადგენს შაბლონებს
+        (function() {
+            const templatesData = '${templatesData.replace(/'/g, "\\'")}';
+            localStorage.setItem('templates', templatesData);
+        })();
+        <\/script>
+        `;
+  
+        const blob = new Blob([combinedContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'site_with_templates.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+  
+    // ჩამოტვირთვის ღილაკის ფუნქციონალის დამატება
+    document.getElementById('downloadButton').addEventListener('click', downloadSite);
+  
+    // ... (დანარჩენი JavaScript კოდი) ...
+   // გლობალური ცვლადები პაროლის მართვისთვის
+  let oneTimePassword = null;
+  let isPasswordUsed = false;
+  
+  function showShutdownState() { 
+   timerElement.style.display = 'none'; 
+   document.body.style.backgroundColor = 'black'; 
+   rgbBackground.style.display = 'block'; 
+   messageElement.style.display = 'block'; 
+   productContent.style.display = 'none'; 
+   passwordForm.style.display = 'block'; // გამოჩნდეს პაროლის ფორმა 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   // ვიდეო გაწვდოს
+   const shutdownVideo = document.getElementById('shutdownVideo');
+   shutdownVideo.style.display = 'block'; // ვიდეო გამოჩნდეს
+   
+   localStorage.setItem('siteStatus', 'shutdown'); 
+  }
+  
+  async function checkPassword() { 
+   const passwordInput = document.getElementById('passwordInput').value; 
+   if (passwordInput === 'paroliparoli') { 
+       passwordForm.style.display = 'none'; 
+       startCountdown(); 
+  
+       // ვიდეო გაქრეს
+       const shutdownVideo = document.getElementById('shutdownVideo');
+       shutdownVideo.style.display = 'none'; // ვიდეო გაქრეს
+   } else { 
+       alert('არასორი პაროლი. სცადეთ ხელახლა.'); 
+   } 
+  }
+  
+  // შევამოწმოთ ავს თუ არ წვდომა
+  if (!localStorage.getItem('accessApproved')) {
+      // თუ რ აქვს წვდომა, გადავამისამართოთ request.html-ზე
+      window.location.href = 'request.html';
+  }
+  
+  // მობილური ოპტიმიზაციის ფუნქციები
+  document.addEventListener('DOMContentLoaded', function() {
+      // ვაფიქსირებთ ვიუპორტს ზუმის თავიდან ასაცილებლად
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+      
+      // ვამატებთ თაჩ ივენთების მხარდაჭერას
+      document.addEventListener('touchstart', function() {}, {passive: true});
+      
+      // ვაუმჯობესებ სქროლის performance-ს
+      const nameList = document.querySelector('.name-list');
+      if (nameList) {
+          nameList.style.webkitOverflowScrolling = 'touch';
+      }
+      
+      // ვაუმჯობესებთ ილაკეის რესპონსივობას
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+          button.addEventListener('touchstart', function(e) {
+              e.preventDefault();
+              this.click();
+          }, {passive: true});
+      });
+  });
+  
+  // ვაუმჯობესებთ გახმოვანების ფუნქციას
+  async function speakGeorgian(text) {
+      try {
+          // ვამოწმებთ აუდიო კონტექსტის მხარდაჭრას
+          if (!'AudioContext' in window && !'webkitAudioContext' in window) {
+              throw new Error('Audio not supported');
+          }
+          
+          const token = await getAzureToken();
+          if (!token) return;
+  
+          // ვამატებთ ლოადინგ ინდიკატორს
+          const loadingIndicator = document.createElement('div');
+          loadingIndicator.className = 'loading-indicator';
+          document.body.appendChild(loadingIndicator);
+  
+          const url = `https://${AZURE_CONFIG.region}.tts.speech.microsoft.com/cognitiveservices/v1`;
+          const ssml = `
+              <speak version='1.0' xml:lang='ka-GE'>
+                  <voice xml:lang='ka-GE' xml:gender='Female' name='ka-GE-EkaNeural'>
+                      <prosody rate="1.1" pitch="+0%">${text}</prosody>
+                  </voice>
+              </speak>`;
+  
+          const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/ssml+xml',
+                  'X-Microsoft-OutputFormat': 'audio-16khz-64kbitrate-mono-mp3' // შემცირებული ბიტრიტი მობილურებისთვის
+              },
+              body: ssml
+          });
+  
+          if (!response.ok) throw new Error('Speech synthesis failed');
+  
+          const blob = await response.blob();
+          const audio = new Audio(URL.createObjectURL(blob));
+          
+          // ვამატებთ აუდიოს დასრულების ჰენდლერს
+          audio.onended = () => {
+              URL.revokeObjectURL(audio.src); // ვათაისუფლებთ მეხსიერებას
+              loadingIndicator.remove();
+          };
+  
+          await audio.play();
+  
+      } catch (error) {
+          console.error('Error with text-to-speech:', error);
+          alert('გახმოვანების შეცდომ. სცადეთ თავიდან.');
+      }
+  }
+  
+  // დავამატოთ მობილუი ოპტიმიზაციის JavaScript კოდი
+  
+  document.addEventListener('DOMContentLoaded', function() {
+      // ვიუპორტის ფიქსაცია
+      const viewport = document.querySelector('meta[name=viewport]');
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+      
+      // Touch ივენთების ოპიიზაი
+      document.addEventListener('touchstart', function() {}, {passive: true});
+      
+      // Double tap პრევენცია
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(event) {
+          const now = (new Date()).getTime();
+          if (now - lastTouchEnd <= 300) {
+              event.preventDefault();
+          }
+          lastTouchEnd = now;
+      }, false);
+  
+      // Scroll ოპტიმიზაცია
+      const nameList = document.querySelector('.name-list');
+      if (nameList) {
+          nameList.style.webkitOverflowScrolling = 'touch';
+      }
+  
+      // ღილაკების რესპონსივობის გაუმჯობესება
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+          button.addEventListener('touchstart', function(e) {
+              this.style.transform = 'scale(0.95)';
+          });
+          button.addEventListener('touchend', function(e) {
+              this.style.transform = 'scale(1)';
+          });
+      });
+  
+      // სოფთ კიბორდის ახურვსას ეკრანის გასწორება
+      const nameInput = document.getElementById('nameInput');
+      nameInput.addEventListener('blur', () => {
+          window.scrollTo(0, 0);
+      });
+  
+      // ორიენტაციის ცვლილებაზე რეაგირება
+      window.addEventListener('orientationchange', () => {
+          setTimeout(() => {
+              window.scrollTo(0, 0);
+              updateLayout();
+          }, 200);
+      });
+  });
+  
+  // ლ���იაუთის განახების ფუნქცია
+  function updateLayout() {
+      const nameList = document.querySelector('.name-list');
+      if (nameList) {
+          const viewportHeight = window.innerHeight;
+          const inputContainer = document.querySelector('.input-container');
+          const groupOptions = document.getElementById('groupSizeOptions');
+          
+          const availableHeight = viewportHeight - 
+              (inputContainer ? inputContainer.offsetHeight : 0) - 
+              (groupOptions ? groupOptions.offsetHeight : 0) - 20;
+              
+          nameList.style.maxHeight = `${availableHeight}px`;
+      }
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+      const accessApproved = localStorage.getItem('accessApproved');
+      
+      // თუ წ��ომა ა აქვს დ არ მოდის request.html-დან
+      if (!accessApproved && !document.referrer.includes('request.html')) {
+          window.location.href = 'request.html';
+      }
+      
+      // ვიუპორტის ფიქსაცია
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+      }
+      
+      // Touch ივენების ოპტიმიზაცია
+      document.addEventListener('touchstart', function() {}, {passive: true});
+      
+      // Double tap პრევენცია
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(event) {
+          const now = (new Date()).getTime();
+          if (now - lastTouchEnd <= 300) {
+              event.preventDefault();
+          }
+          lastTouchEnd = now;
+      }, false);
+  
+      // Scroll ოპტიმიზაცა
+      const nameList = document.querySelector('.name-list');
+      if (nameList) {
+          nameList.style.webkitOverflowScrolling = 'touch';
+      }
+  
+      // ღილაკეის რესპონსივობის გაუმჯობესება
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+          button.addEventListener('touchstart', function(e) {
+              this.style.transform = 'scale(0.95)';
+          });
+          button.addEventListener('touchend', function(e) {
+              this.style.transform = 'scale(1)';
+          });
+      });
+  
+      // სოფთ კიბორდის დახურვისას ეკრანის ასწრება
+      const nameInput = document.getElementById('nameInput');
+      if (nameInput) {
+          nameInput.addEventListener('blur', () => {
+              window.scrollTo(0, 0);
+          });
+      }
+  
+      // ორიენტაციის ცვლილებაზე რეაგირება
+      window.addEventListener('orientationchange', () => {
+          setTimeout(() => {
+              window.scrollTo(0, 0);
+              updateLayout();
+          }, 200);
+      });
+  }); // დავამატეთ დამაკლებული დახურვის ფრჩხილი
+  
+  // ლეიაუთის განახლების ფუნქცია
+  function updateLayout() {
+      const nameList = document.querySelector('.name-list');
+      if (nameList) {
+          const viewportHeight = window.innerHeight;
+          const inputContainer = document.querySelector('.input-container');
+          const groupOptions = document.getElementById('groupSizeOptions');
+          
+          const availableHeight = viewportHeight - 
+              (inputContainer ? inputContainer.offsetHeight : 0) - 
+              (groupOptions ? groupOptions.offsetHeight : 0) - 20;
+              
+          nameList.style.maxHeight = `${availableHeight}px`;
+      }
+  }
+  
+  // Call startCountdown when the page loads or when a specific event occurs
+  document.addEventListener('DOMContentLoaded', function() {
+      startCountdown();
+  });
+  
+  // დავამატოთ { passive: false } ოფცია event listener-ებისთვის
+  document.addEventListener('touchstart', function(e) {
+      if (e.target.classList.contains('your-button-class')) {
+          e.preventDefault();
+      }
+  }, { passive: false });
+  
+  // ან თუ jQuery-ს იყენებთ:
+  $(document).on('touchstart', '.your-button-class', function(e) {
+      e.preventDefault();
+  });
+  
+  // ალტერნატიულად, შეგვიძლია გამოვიყენოთ click ივენთი touch-ის ნაცვლად:
+  document.querySelector('.your-button-class').addEventListener('click', function(e) {
+      e.preventDefault();
+      // თქვენი კოდი აქ
+  });
+  
+  function askGroupChoice(number) {
+      if (students.length < 4) {
+          alert("საჭიროა მინიმუმ 4 მოსწავლე");
+          return;
+      }
+      
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      overlay.style.zIndex = '999';
+  
+      const dialog = document.createElement('div');
+      dialog.style.position = 'fixed';
+      dialog.style.left = '50%';
+      dialog.style.top = '50%';
+      dialog.style.transform = 'translate(-50%, -50%)';
+      dialog.style.backgroundColor = 'white';
+      dialog.style.padding = '20px';
+      dialog.style.borderRadius = '5px';
+      dialog.style.zIndex = '1000';
+      dialog.style.minWidth = '300px';
+  
+      const text = document.createElement('div');
+      text.style.marginBottom = '20px';
+      text.style.textAlign = 'center';
+      text.textContent = `${number} კაციანი ჯგუფების გაკეთება გინათ თუ ${number} ჯგუფის გაკეთება?`;
+      dialog.appendChild(text);
+  
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.justifyContent = 'center';
+      buttonContainer.style.gap = '10px';
+  
+      const studentButton = document.createElement('button');
+      studentButton.textContent = 'მოსწავლეების რაოდენობა ჯგუფში';
+      studentButton.style.padding = '8px 16px';
+      studentButton.onclick = () => {
+          document.body.removeChild(overlay);
+          createGroupsByStudentCount(number);
+      };
+  
+      const groupButton = document.createElement('button');
+      groupButton.textContent = 'ჯგუფების რაოდენობა';
+      groupButton.style.padding = '8px 16px';
+      groupButton.onclick = () => {
+          document.body.removeChild(overlay);
+          createGroupsByGroupCount(number);
+      };
+  
+      buttonContainer.appendChild(studentButton);
+      buttonContainer.appendChild(groupButton);
+      dialog.appendChild(buttonContainer);
+      overlay.appendChild(dialog);
+      document.body.appendChild(overlay);
+  }
+  
+  function createGroupsByStudentCount(studentsPerGroup) {
+      const totalStudents = students.length;
+      
+      // გამოვთვალოთ ჯგუფების რაოდენობა
+      const numberOfGroups = Math.ceil(totalStudents / studentsPerGroup);
+      
+      // გამოვთვალოთ მინიმალური რაოდენობა თითო ჯგუფში
+      const minStudentsPerGroup = Math.floor(totalStudents / numberOfGroups);
+      
+      // გამოვთვალოთ რამდენ ჯგუფს დასჭირდება დამატებითი სტუდენი
+      const extraStudents = totalStudents % numberOfGroups;
+      
+      // შევქმნათ ჯგუფების მასივი
+      const groups = [];
+      let currentIndex = 0;
+      
+      // დავარანდომოთ სტუდენტების მასივი
+      const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+      
+      // შევქმნათ ჯგუფები
+      for (let i = 0; i < numberOfGroups; i++) {
+          const currentGroupSize = minStudentsPerGroup + (i < extraStudents ? 1 : 0);
+          const group = shuffledStudents.slice(currentIndex, currentIndex + currentGroupSize);
+          groups.push(group);
+          currentIndex += currentGroupSize;
+      }
+      
+      // გამოვაჩინოთ ჯგუფები
+      displayGroups(groups);
+  }
+  
+  function displayGroups(groups) {
+      const groupsHTML = groups.map((group, index) => 
+          `<div class="group">ჯგ��ფი ${index + 1}: ${group.join(', ')}</div>`
+      ).join('');
+  
+      groupsList.innerHTML = groupsHTML;
+  }
+  
+  function createGroupsByGroupCount(numberOfGroups) {
+      // შევამოწმოთ არის თუ არა საკმარისი სტუდენტები (მინიმუმ 2 სტუდენტი თითო ჯგფში)
+      if (students.length < numberOfGroups * 2) {
+          alert(`ჯგუფები ვერ გაკეთდება. ${numberOfGroups} ჯგუფისთვის საჭიროა მინიმუმ ${numberOfGroups * 2} სტუდენტი (თითო ჯგუფში ინიმუმ 2 სტუდენტი)`);
+          return;
+      }
+      
+      // დავარანდომოთ ���ტუდენ���ების მ����სივი
+      const shuffledStudents = [...students].sort(() => Math.random() - 0.5);
+      
+      // გამოვთვალოთ მინიმალური და მაქსიმალური რაოდენობა ჯგუფში
+      const minStudentsPerGroup = Math.floor(students.length / numberOfGroups);
+      const remainingStudents = students.length % numberOfGroups;
+      
+      // შევქმნათ ჯგუფების მასივი
+      const groups = Array(numberOfGroups).fill().map(() => []);
+      
+      let currentIndex = 0;
+      
+      // პირველ რიგში გავანაწილოთ მიიმალური რაოდენობა ყველა ჯგუფში
+      for (let i = 0; i < numberOfGroups; i++) {
+          groups[i] = shuffledStudents.slice(currentIndex, currentIndex + minStudentsPerGroup);
+          currentIndex += minStudentsPerGroup;
+      }
+      
+      // დარჩენილი სტუდენტები გავანაწილოთ თანაბრად
+      for (let i = 0; i < remainingStudents; i++) {
+          groups[i].push(shuffledStudents[currentIndex + i]);
+      }
+      
+      displayGroups(groups);
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+      // ღილაკების ინიციალიზაცია
+      const pairStudentsButton = document.getElementById('pairStudentsButton');
+      
+      // ვამოწმებთ ღილაკის არსებობას
+      if (pairStudentsButton) {
+          // ვამატებთ click ლისენერს
+          pairStudentsButton.addEventListener('click', function(e) {
+              e.preventDefault();
+              showClassTemplateDialog();
+          });
+          
+          // ვამატებთ touchstart ლისენერს მობილურებისთვის
+          pairStudentsButton.addEventListener('touchstart', function(e) {
+              e.preventDefault();
+              showClassTemplateDialog();
+          }, { passive: false });
+          
+          // ვრთავთ ღილაკს
+          pairStudentsButton.disabled = false;
+      }
+      
+      // ვამოწმებთ და ვრთავთ ყველა საჭირო ფუნქციონალს
+      initializeButtons();
+  });
+  
+  // ახალი ფუნქცია ღილაკების ინიციალიზაციისთვის
+  function initializeButtons() {
+      const buttons = {
+          pairStudents: document.getElementById('pairStudentsButton'),
+          selectStudent: document.getElementById('selectStudentButton'),
+          download: document.getElementById('downloadButton')
+      };
+      
+      // ვამოწმებთ თითოეულ ღილაკს
+      Object.entries(buttons).forEach(([key, button]) => {
+          if (button) {
+              // ვრთავთ ღილაკს
+              button.disabled = false;
+              
+              // ვამატებთ ვიზუალურ ფიდბექს
+              button.addEventListener('touchstart', function() {
+                  this.style.opacity = '0.7';
+              });
+              
+              button.addEventListener('touchend', function() {
+                  this.style.opacity = '1';
+              });
+          }
+      });
+  }
+  
+  // დავამატოთ მომხმარებლის სტატუსის შემოწმება
+  function checkUserAccess(uniqueCode) {
+      const userRef = ref(database, `activeUsers/${uniqueCode}`);
+      onValue(userRef, (snapshot) => {
+          const userData = snapshot.val();
+          if (userData && userData.blocked) {
+              // თუ მომხმარებელი დაბლოკილია, გადავამისამართოთ request.html-ზე
+              window.location.href = 'request.html';
+          }
+      });
+  }
+  
+  // მომხმარებლის აქტივობის განახლება
+  function updateUserActivity(uniqueCode) {
+      const updates = {};
+      updates[`activeUsers/${uniqueCode}/lastActive`] = Date.now();
+      update(ref(database), updates);
+  }
+  
+  // ვამოწმებთ მომხმარებლის სტატუსს ყოველ 5 წამში
+  setInterval(() => {
+      const uniqueCode = localStorage.getItem('uniqueCode');
+      if (uniqueCode) {
+          checkUserAccess(uniqueCode);
+          updateUserActivity(uniqueCode);
+      }
+  }, 5000);
+  
+  // საწყისი შემოწმება
+  const uniqueCode = localStorage.getItem('uniqueCode');
+  if (uniqueCode) {
+      checkUserAccess(uniqueCode);
+      updateUserActivity(uniqueCode);
+  }
+  ზზ</script>
+  <script>
+    
+  </script>
+  
+  </body></html>
